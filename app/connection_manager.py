@@ -20,9 +20,6 @@ class ConnectionManager:
             await connection.send_text(message)
 
 
-manager = ConnectionManager()
-
-
 class ConnectionLayerManager:
     def __init__(self):
         self.active_manager: dict[int, ConnectionManager] = {}
@@ -31,5 +28,11 @@ class ConnectionLayerManager:
         conn_manager = self.active_manager.setdefault(layer_id, ConnectionManager())
         return conn_manager
 
+    async def disconnect(self, websocket: WebSocket, layer_id: int):
+        self.active_manager[layer_id].disconnect(websocket)
+        if not self.active_manager[layer_id]:
+            self.active_manager.pop(layer_id)
 
+
+manager = ConnectionManager()
 layer_manager = ConnectionLayerManager()

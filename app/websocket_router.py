@@ -1,6 +1,7 @@
-from fastapi import WebSocket, FastAPI, WebSocketDisconnect
+from fastapi import WebSocket, FastAPI, WebSocketDisconnect, Depends
 
 from connection_manager import manager, layer_manager
+from dependencies import get_user
 
 
 ws = FastAPI()
@@ -15,7 +16,7 @@ async def echo_handler(websocket: WebSocket):
 
 
 @ws.websocket('/{username}')
-async def websocket_endpoint(websocket: WebSocket, username: str):
+async def websocket_endpoint(websocket: WebSocket, username: str = Depends(get_user)):
     await manager.connect(websocket)
     try:
         while True:
@@ -28,7 +29,7 @@ async def websocket_endpoint(websocket: WebSocket, username: str):
 
 
 @ws.websocket('/chat/{chat_id}')
-async def websocket_chat(websocket: WebSocket, chat_id: int):
+async def websocket_chat(websocket: WebSocket, chat_id: int, username: str = Depends(get_user)):
     conn_manager = await layer_manager.connect_to_manager(chat_id)
     await conn_manager.connect(websocket)
     try:
@@ -38,4 +39,4 @@ async def websocket_chat(websocket: WebSocket, chat_id: int):
             await conn_manager.broadcast(f'New message: {data}')
     except WebSocketDisconnect:
         conn_manager.disconnect(websocket)
-        await conn_manager.broadcast(f'Client left chat')
+        await conn_manager.broadcast(f'Client {username} left chat')
