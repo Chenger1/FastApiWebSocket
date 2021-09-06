@@ -9,18 +9,22 @@ router = APIRouter(
 
 
 @router.post('/sign-up')
-async def sign_up(username: str, password: str):
-    users = await redis_manager.manual_get('hdetall', 'users')
+async def sign_up(username: str):
+    users = await redis_manager.manual_get('hgetall', 'users')
+    last_id = await redis_manager.manual_get('get', 'user_id')
     if username in users.keys():
         raise HTTPException(
             detail='User with this username already exists',
             status_code=404
         )
-    users[username] = password  # Save plain password only for learning purposes.
+    new_id = int(last_id) + 1
+    users[new_id] = username
+
     await redis_manager.manual_set('hmset', 'users', users)
+    await redis_manager.manual_set('set', 'user_id', new_id)
     return {
         'username': username,
-        'password': password,
+        'user_id': new_id,
         'status': 200
     }
 

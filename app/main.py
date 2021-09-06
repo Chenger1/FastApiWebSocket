@@ -16,6 +16,7 @@ app.mount('/ws', ws)  # FastApi cant handle websocket in router. BUG! Have to in
 @app.on_event('startup')
 async def startup_event():
     await redis_manager.init_redis()
+    await redis_manager.manual_set('set', 'user_id', 0)
 
 
 @app.on_event('shutdown')
