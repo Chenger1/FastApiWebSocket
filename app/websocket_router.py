@@ -34,9 +34,9 @@ async def websocket_chat(websocket: WebSocket, chat_id: int, username: str = Dep
     await conn_manager.connect(websocket)
     try:
         while True:
-            data = await websocket.receive_text()
-            await conn_manager.send_personal_message(f'You wrote: {data}', websocket)
-            await conn_manager.broadcast(f'New message: {data}')
+            data = await websocket.receive_json()
+            await conn_manager.broadcast(f'{data["username"]}: {data["message"]}')
+            await layer_manager.cross_channel_broadcast(2, f"You have received message from {username}")
     except WebSocketDisconnect:
         conn_manager.disconnect(websocket)
         await conn_manager.broadcast(f'Client {username} left chat')

@@ -1,5 +1,7 @@
 from fastapi import WebSocket
 
+from typing import Union
+
 
 class ConnectionManager:
     def __init__(self):
@@ -15,9 +17,12 @@ class ConnectionManager:
     async def send_personal_message(self, message: str, websocket: WebSocket):
         await websocket.send_text(message)
 
-    async def broadcast(self, message: str):
+    async def broadcast(self, message: Union[str, dict]):
         for connection in self.active_connection:
-            await connection.send_text(message)
+            if isinstance(message, str):
+                await connection.send_text(message)
+            elif isinstance(message, dict):
+                await connection.send_json(message)
 
 
 class ConnectionLayerManager:
@@ -32,6 +37,12 @@ class ConnectionLayerManager:
         self.active_manager[layer_id].disconnect(websocket)
         if not self.active_manager[layer_id]:
             self.active_manager.pop(layer_id)
+
+    async def cross_channel_broadcast(self, layer_id: int, data: Union[str, dict]):
+        try:
+            await self.active_manager[layer_id].broadcast(data)
+        except KeyError:
+            return
 
 
 manager = ConnectionManager()
