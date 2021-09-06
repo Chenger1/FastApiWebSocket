@@ -10,7 +10,7 @@ router = APIRouter(
 
 @router.post('/sign-up')
 async def sign_up(username: str, password: str):
-    users = await redis_manager.get('users') or {}
+    users = await redis_manager.manual_get('hdetall', 'users')
     if username in users.keys():
         raise HTTPException(
             detail='User with this username already exists',

@@ -12,12 +12,6 @@ class RedisManager:
             'redis://localhost', encoding='utf-8', decode_responses=True
         )
 
-    async def set(self, key, value):
-        return await self.redis_manager.set(key, value)
-
-    async def get(self, key):
-        return await self.redis_manager.get(key)
-
     async def manual_get(self, method, key):
         return await getattr(self.redis_manager, method)(key)
 
