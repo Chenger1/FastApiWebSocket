@@ -4,10 +4,13 @@ import uvicorn
 from redis_db import redis_manager
 
 from router import router as auth_router
+from websocket_router import ws
 
 
 app = FastAPI()
 app.include_router(auth_router)
+
+app.mount('/ws', ws)  # FastApi cant handle websocket in router. BUG! Have to init another app
 
 
 @app.on_event('startup')
