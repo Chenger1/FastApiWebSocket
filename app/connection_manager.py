@@ -21,3 +21,15 @@ class ConnectionManager:
 
 
 manager = ConnectionManager()
+
+
+class ConnectionLayerManager:
+    def __init__(self):
+        self.active_manager: dict[int, ConnectionManager] = {}
+
+    async def connect_to_manager(self, layer_id: int):
+        conn_manager = self.active_manager.setdefault(layer_id, ConnectionManager())
+        return conn_manager
+
+
+layer_manager = ConnectionLayerManager()
